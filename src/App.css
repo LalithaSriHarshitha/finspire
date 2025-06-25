@@ -1,0 +1,444 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 0.5rem 2rem;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.navbar-list {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-list li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+}
+
+.navbar-list li a:hover {
+  color: #0077ff;
+}
+
+.page-content {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fafbfc;
+  border-radius: 10px;
+  min-height: 60vh;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 1rem 3rem 1rem;
+  background: linear-gradient(90deg, #f8fafc 60%, #e3f0ff 100%);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.hero-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.hero-cta {
+  display: inline-block;
+  background: #0077ff;
+  color: #fff;
+  padding: 0.9rem 2.2rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.hero-cta:hover {
+  background: #005fcc;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 1.2s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.connect-page {
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.connect-form {
+  flex: 1 1 260px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+  min-width: 260px;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.connect-form h2 {
+  margin-bottom: 0.5rem;
+  color: #1a237e;
+}
+.connect-form input,
+.connect-form textarea {
+  padding: 0.7rem;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  font-size: 1rem;
+  resize: none;
+}
+.connect-form button {
+  background: #0077ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.connect-form button:hover {
+  background: #005fcc;
+}
+
+.funder-cards {
+  flex: 2 1 400px;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.funder-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.2rem 1rem;
+  min-width: 180px;
+  max-width: 220px;
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.funder-card h3 {
+  margin: 0 0 0.2rem 0;
+  color: #0077ff;
+  font-size: 1.1rem;
+}
+.funder-type {
+  background: #e3f0ff;
+  color: #1a237e;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  padding: 0.1rem 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.learn-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: flex-start;
+}
+.video-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1rem;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.video-title {
+  margin-top: 0.7rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1a237e;
+  text-align: center;
+}
+
+.progress-page {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+}
+.progress-page h2 {
+  color: #1a237e;
+  margin-bottom: 1.2rem;
+}
+.milestone-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+.milestone-list li {
+  margin-bottom: 0.7rem;
+  font-size: 1.08rem;
+}
+.milestone-list input[type="checkbox"] {
+  margin-right: 0.7rem;
+  accent-color: #0077ff;
+}
+.progress-bar-bg {
+  width: 100%;
+  height: 18px;
+  background: #e3f0ff;
+  border-radius: 9px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0077ff 60%, #1a237e 100%);
+  border-radius: 9px 0 0 9px;
+  transition: width 0.4s;
+}
+.progress-label {
+  text-align: right;
+  font-size: 0.98rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.pitch-help-page {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.pitch-help-page h2 {
+  color: #1a237e;
+  margin-bottom: 0.7rem;
+}
+.pitch-help-page input[type="file"] {
+  margin-bottom: 0.7rem;
+}
+.file-info {
+  color: #0077ff;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.ai-feedback {
+  background: #e3f0ff;
+  border-radius: 7px;
+  padding: 1rem;
+  color: #1a237e;
+  font-size: 1.05rem;
+  margin-top: 0.5rem;
+}
+
+.community-page {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.chat-box {
+  background: #f8fafc;
+  border-radius: 8px;
+  min-height: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 1rem;
+  margin-bottom: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.chat-msg {
+  background: #e3f0ff;
+  border-radius: 6px;
+  padding: 0.5rem 0.8rem;
+  color: #1a237e;
+  align-self: flex-start;
+  max-width: 80%;
+  word-break: break-word;
+}
+.chat-msg-you {
+  background: #0077ff;
+  color: #fff;
+  align-self: flex-end;
+}
+.chat-user {
+  font-weight: 600;
+  margin-right: 0.4rem;
+}
+.chat-input-row {
+  display: flex;
+  gap: 0.7rem;
+}
+.chat-input-row input {
+  flex: 1;
+  padding: 0.7rem;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.chat-input-row button {
+  background: #0077ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.chat-input-row button:hover {
+  background: #005fcc;
+}
+
+.username-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+  max-width: 350px;
+  margin: 4rem auto 0 auto;
+}
+.username-form label {
+  color: #1a237e;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.username-form input {
+  padding: 0.7rem;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+}
+.username-form button {
+  background: #0077ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+.username-form button:hover {
+  background: #005fcc;
+}
+
+.add-milestone-form {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1.5rem;
+}
+.add-milestone-form input {
+  flex: 1;
+  padding: 0.7rem;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.add-milestone-form button {
+  background: #0077ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.add-milestone-form button:hover {
+  background: #005fcc;
+}
