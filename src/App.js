@@ -5,6 +5,7 @@ import ReactPlayer from 'react-player';
 import { db } from './firebase';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import LandingPage from "./LandingPage";
+
 // Page stubs
 function Home() {
   return (
@@ -17,6 +18,7 @@ function Home() {
     </section>
   );
 }
+
 function Connect() {
   const [form, setForm] = React.useState({ name: '', email: '', idea: '' });
   const funders = [
@@ -24,8 +26,15 @@ function Connect() {
     { name: 'GrowthX Fund', type: 'VC', desc: 'Focus on tech and social impact.' },
     { name: 'Empower Grants', type: 'Grant', desc: 'Non-dilutive funding for women entrepreneurs.' },
   ];
+
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleSubmit = e => { e.preventDefault(); alert('Submitted!'); };
+  
+  const handleSubmit = e => {
+    e.preventDefault();
+    alert('Connection request submitted successfully! We will get back to you soon.');
+    setForm({ name: '', email: '', idea: '' });
+  };
+
   return (
     <div className="connect-page">
       <form className="connect-form" onSubmit={handleSubmit}>
@@ -47,6 +56,7 @@ function Connect() {
     </div>
   );
 }
+
 function Community() {
   const [messages, setMessages] = React.useState([]);
   const [input, setInput] = React.useState('');
@@ -112,6 +122,7 @@ function Community() {
     </div>
   );
 }
+
 function Learn() {
   const videos = [
     { title: 'How to Pitch', url: 'https://www.youtube.com/watch?v=HAnw168huqA' },
@@ -129,24 +140,35 @@ function Learn() {
     </div>
   );
 }
+
 function PitchHelp() {
   const [file, setFile] = React.useState(null);
   const [feedback, setFeedback] = React.useState('');
-  const handleFile = e => {
+  const [loading, setLoading] = React.useState(false);
+
+  const handleFile = (e) => {
     const f = e.target.files[0];
     setFile(f);
+    setLoading(true);
+    
     // Simulate AI feedback
-    setTimeout(() => setFeedback('Great start! Consider clarifying your value proposition and target audience.'), 1200);
+    setTimeout(() => {
+      setFeedback('Great start! Consider clarifying your value proposition and target audience. Your pitch shows potential but could benefit from more specific market validation data and clearer revenue model explanation.');
+      setLoading(false);
+    }, 2000);
   };
+
   return (
     <div className="pitch-help-page">
       <h2>Pitch Help: Get AI Feedback</h2>
       <input type="file" accept=".pdf,.doc,.docx,.txt" onChange={handleFile} />
       {file && <div className="file-info">Uploaded: {file.name}</div>}
+      {loading && <div className="loading-message">Analyzing your pitch...</div>}
       {feedback && <div className="ai-feedback"><strong>AI Feedback:</strong> {feedback}</div>}
     </div>
   );
 }
+
 function Progress() {
   const [milestones, setMilestones] = React.useState([
     'Validate your idea',
@@ -208,32 +230,247 @@ function Progress() {
   );
 }
 
+function Register() {
+  const [form, setForm] = React.useState({ name: '', email: '', password: '' });
+  const [status, setStatus] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    setStatus('');
+    setLoading(true);
+    
+    // Simulate registration
+    setTimeout(() => {
+      setStatus('Registration successful! You can now log in.');
+      setForm({ name: '', email: '', password: '' });
+      setLoading(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="auth-page">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Register</h2>
+        <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required />
+        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required />
+        <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required />
+        <button type="submit" disabled={loading}>Register</button>
+        {status && <div className="submit-status">{status}</div>}
+      </form>
+    </div>
+  );
+}
+
+function Login({ onLogin }) {
+  const [form, setForm] = React.useState({ email: '', password: '' });
+  const [status, setStatus] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    setStatus('');
+    setLoading(true);
+    
+    // Simulate login
+    setTimeout(() => {
+      localStorage.setItem('jwt', 'mock-jwt-token');
+      setStatus('Login successful!');
+      if (onLogin) onLogin();
+      setLoading(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="auth-page">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required />
+        <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required />
+        <button type="submit" disabled={loading}>Login</button>
+        {status && <div className="submit-status">{status}</div>}
+      </form>
+    </div>
+  );
+}
+
+function Profile({ onLogout }) {
+  const [profile, setProfile] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading profile
+    setTimeout(() => {
+      setProfile({
+        name: 'Demo User',
+        email: 'demo@example.com',
+        createdAt: new Date().toISOString()
+      });
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwt');
+    if (onLogout) onLogout();
+  };
+
+  if (loading) return <div className="loading-message">Loading profile...</div>;
+  if (!profile) return null;
+
+  return (
+    <div className="profile-page">
+      <h2>Your Profile</h2>
+      <div><strong>Name:</strong> {profile.name}</div>
+      <div><strong>Email:</strong> {profile.email}</div>
+      <div><strong>Joined:</strong> {new Date(profile.createdAt).toLocaleString()}</div>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  );
+}
+
+function BusinessAdvice() {
+  const [form, setForm] = React.useState({ question: '', context: '', industry: '' });
+  const [advice, setAdvice] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    setAdvice('');
+    setError('');
+    setLoading(true);
+    
+    // Simulate AI advice
+    setTimeout(() => {
+      const mockAdvice = `Based on your question about "${form.question}", here's my advice:
+
+**Key Recommendations:**
+1. Focus on validating your market assumptions early
+2. Build a strong network of mentors and advisors
+3. Start with a minimum viable product (MVP)
+4. Track key metrics from day one
+
+**Next Steps:**
+- Conduct customer interviews
+- Create a simple prototype
+- Join relevant industry groups
+- Set up basic analytics
+
+Remember, every successful entrepreneur started exactly where you are. Stay persistent and keep learning!`;
+      
+      setAdvice(mockAdvice);
+      setLoading(false);
+    }, 2000);
+  };
+
+  return (
+    <div className="business-advice-page">
+      <form className="business-advice-form" onSubmit={handleSubmit}>
+        <h2>Business Advice: Ask AI</h2>
+        <textarea name="question" value={form.question} onChange={handleChange} placeholder="Your business question..." required rows={3} />
+        <input name="context" value={form.context} onChange={handleChange} placeholder="Context (optional)" />
+        <input name="industry" value={form.industry} onChange={handleChange} placeholder="Industry (optional)" />
+        <button type="submit" disabled={loading}>Get Advice</button>
+      </form>
+      {loading && <div className="loading-message">Getting advice...</div>}
+      {error && <div className="error-message">{error}</div>}
+      {advice && (
+        <div className="ai-feedback">
+          <strong>AI Advice:</strong>
+          <div style={{ whiteSpace: 'pre-line', marginTop: '10px' }}>{advice}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AnalyticsDashboard() {
+  const [analytics, setAnalytics] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading analytics
+    setTimeout(() => {
+      setAnalytics({
+        profileViews: 42,
+        connections: 8,
+        messages: 15
+      });
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  if (loading) return <div className="loading-message">Loading analytics...</div>;
+  if (!analytics) return <div className="error-message">Failed to load analytics</div>;
+
+  return (
+    <div className="analytics-dashboard">
+      <h2>Your Analytics</h2>
+      <div className="analytics-grid">
+        <div className="analytics-card">
+          <h3>Profile Views</h3>
+          <div className="analytics-number">{analytics.profileViews}</div>
+        </div>
+        <div className="analytics-card">
+          <h3>Connections Made</h3>
+          <div className="analytics-number">{analytics.connections}</div>
+        </div>
+        <div className="analytics-card">
+          <h3>Messages Sent</h3>
+          <div className="analytics-number">{analytics.messages}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BoxedPage({ children }) {
   return <div className="page-content">{children}</div>;
 }
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = React.useState(() => !!localStorage.getItem('jwt'));
+
+  const handleLogin = () => setIsLoggedIn(true);
+  const handleLogout = () => setIsLoggedIn(false);
+
   return (
     <Router>
       <nav className="navbar bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
         <ul className="navbar-list flex flex-wrap justify-center gap-2 sm:gap-4 md:gap-6 py-2">
-          <li><Link to="/" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Landing Page</Link></li>
-          <li><Link to="/home" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Home</Link></li>
+          <li><Link to="/" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Home</Link></li>
           <li><Link to="/connect" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Connect</Link></li>
           <li><Link to="/community" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Community</Link></li>
           <li><Link to="/learn" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Learn</Link></li>
           <li><Link to="/pitch-help" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Pitch Help</Link></li>
           <li><Link to="/progress" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Progress</Link></li>
+          <li><Link to="/business-advice" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">AI Advice</Link></li>
+          <li><Link to="/analytics" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Analytics</Link></li>
+          {isLoggedIn && (
+            <li><Link to="/profile" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Profile</Link></li>
+          )}
         </ul>
       </nav>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/home" element={<BoxedPage><Home /></BoxedPage>} />
+        <Route path="/home" element={<LandingPage />} />
         <Route path="/connect" element={<BoxedPage><Connect /></BoxedPage>} />
         <Route path="/community" element={<BoxedPage><Community /></BoxedPage>} />
         <Route path="/learn" element={<BoxedPage><Learn /></BoxedPage>} />
         <Route path="/pitch-help" element={<BoxedPage><PitchHelp /></BoxedPage>} />
         <Route path="/progress" element={<BoxedPage><Progress /></BoxedPage>} />
+        <Route path="/register" element={<BoxedPage><Register /></BoxedPage>} />
+        <Route path="/login" element={<BoxedPage><Login onLogin={handleLogin} /></BoxedPage>} />
+        <Route path="/profile" element={<BoxedPage><Profile onLogout={handleLogout} /></BoxedPage>} />
+        <Route path="/business-advice" element={<BoxedPage><BusinessAdvice /></BoxedPage>} />
+        <Route path="/analytics" element={<BoxedPage><AnalyticsDashboard /></BoxedPage>} />
       </Routes>
     </Router>
   );
