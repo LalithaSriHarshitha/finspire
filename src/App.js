@@ -4,7 +4,7 @@ import './App.css';
 import ReactPlayer from 'react-player';
 import { db } from './firebase';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
-
+import LandingPage from "./LandingPage";
 // Page stubs
 function Home() {
   return (
@@ -156,74 +156,85 @@ function Progress() {
     'Launch your business',
   ]);
   const [checked, setChecked] = React.useState([false, false, false, false, false]);
-  const [newMilestone, setNewMilestone] = React.useState('');
+  const [newMilestone, setNewMilestone] = React.useState("");
 
   const handleCheck = idx => setChecked(checked => checked.map((c, i) => i === idx ? !c : c));
-  
-  const handleAddMilestone = () => {
+
+  const handleAddMilestone = e => {
+    e.preventDefault();
     if (newMilestone.trim()) {
       setMilestones([...milestones, newMilestone.trim()]);
       setChecked([...checked, false]);
-      setNewMilestone('');
+      setNewMilestone("");
     }
   };
 
   const percent = (checked.filter(Boolean).length / milestones.length) * 100;
-  
+
   return (
     <div className="progress-page">
       <h2>Your Startup Journey</h2>
-      <div className="add-milestone-form">
-        <input 
-          type="text" 
-          value={newMilestone} 
-          onChange={e => setNewMilestone(e.target.value)} 
-          placeholder="Add a new milestone..." 
-          onKeyPress={e => e.key === 'Enter' && handleAddMilestone()}
+      <form className="add-milestone-form" onSubmit={handleAddMilestone} style={{ marginBottom: '1rem' }}>
+        <input
+          type="text"
+          value={newMilestone}
+          onChange={e => setNewMilestone(e.target.value)}
+          placeholder="Add a new milestone..."
+          className="px-3 py-2 border rounded mr-2"
         />
-        <button onClick={handleAddMilestone}>Add</button>
-      </div>
+        <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded">Add</button>
+      </form>
       <ul className="milestone-list">
         {milestones.map((m, i) => (
-          <li key={i}>
-            <label>
-              <input type="checkbox" checked={checked[i]} onChange={() => handleCheck(i)} />
-              {m}
-            </label>
+          <li key={i} className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              checked={checked[i] || false}
+              onChange={() => handleCheck(i)}
+              className="mr-2"
+            />
+            <span className={checked[i] ? "line-through text-gray-400" : ""}>{m}</span>
           </li>
         ))}
       </ul>
-      <div className="progress-bar-bg">
-        <div className="progress-bar-fill" style={{ width: percent + '%' }} />
+      <div className="progress-bar-bg" style={{ background: '#eee', borderRadius: '8px', height: '16px', margin: '1rem 0' }}>
+        <div
+          className="progress-bar-fill"
+          style={{ width: percent + '%', background: '#a78bfa', height: '100%', borderRadius: '8px', transition: 'width 0.3s' }}
+        />
       </div>
       <div className="progress-label">{Math.round(percent)}% complete</div>
     </div>
   );
 }
 
+function BoxedPage({ children }) {
+  return <div className="page-content">{children}</div>;
+}
+
 function App() {
   return (
     <Router>
-      <nav className="navbar">
-        <ul className="navbar-list">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/connect">Connect</Link></li>
-          <li><Link to="/community">Community</Link></li>
-          <li><Link to="/learn">Learn</Link></li>
-          <li><Link to="/pitch-help">Pitch Help</Link></li>
-          <li><Link to="/progress">Progress</Link></li>
+      <nav className="navbar bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
+        <ul className="navbar-list flex flex-wrap justify-center gap-2 sm:gap-4 md:gap-6 py-2">
+          <li><Link to="/" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Landing Page</Link></li>
+          <li><Link to="/home" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Home</Link></li>
+          <li><Link to="/connect" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Connect</Link></li>
+          <li><Link to="/community" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Community</Link></li>
+          <li><Link to="/learn" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Learn</Link></li>
+          <li><Link to="/pitch-help" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Pitch Help</Link></li>
+          <li><Link to="/progress" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition">Progress</Link></li>
         </ul>
       </nav>
-      <div className="page-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/connect" element={<Connect />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/learn" element={<Learn />} />
-          <Route path="/pitch-help" element={<PitchHelp />} />
-          <Route path="/progress" element={<Progress />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<BoxedPage><Home /></BoxedPage>} />
+        <Route path="/connect" element={<BoxedPage><Connect /></BoxedPage>} />
+        <Route path="/community" element={<BoxedPage><Community /></BoxedPage>} />
+        <Route path="/learn" element={<BoxedPage><Learn /></BoxedPage>} />
+        <Route path="/pitch-help" element={<BoxedPage><PitchHelp /></BoxedPage>} />
+        <Route path="/progress" element={<BoxedPage><Progress /></BoxedPage>} />
+      </Routes>
     </Router>
   );
 }
