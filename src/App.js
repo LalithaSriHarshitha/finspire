@@ -18,14 +18,65 @@ function Home() {
   );
 }
 function Connect() {
-  const [form, setForm] = React.useState({ name: '', email: '', idea: '' });
-  const funders = [
-    { name: 'Jane Capital', type: 'Angel Investor', desc: 'Invests in early-stage women-led startups.' },
-    { name: 'GrowthX Fund', type: 'VC', desc: 'Focus on tech and social impact.' },
-    { name: 'Empower Grants', type: 'Grant', desc: 'Non-dilutive funding for women entrepreneurs.' },
-  ];
+  const [form, setForm] = React.useState({ name: '', email: '', idea: '', funderId: '' });
+  const [funders, setFunders] = React.useState([]);
+  const [loadingFunders, setLoadingFunders] = React.useState(true);
+  const [fundersError, setFundersError] = React.useState('');
+  const [submitStatus, setSubmitStatus] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
+
+  React.useEffect(() => {
+    async function fetchFunders() {
+      setLoadingFunders(true);
+      setFundersError('');
+      try {
+        const res = await fetch('http://localhost:5000/api/funders');
+        const data = await res.json();
+        if (res.ok) {
+          setFunders(data.funders);
+        } else {
+          setFundersError(data.message || 'Failed to load funders');
+        }
+      } catch (err) {
+        setFundersError('Network error. Please try again.');
+      } finally {
+        setLoadingFunders(false);
+      }
+    }
+    fetchFunders();
+  }, []);
+
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleSubmit = e => { e.preventDefault(); alert('Submitted!'); };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setSubmitStatus('');
+    setSubmitting(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/funders/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          funderId: form.funderId,
+          entrepreneurName: form.name,
+          email: form.email,
+          businessIdea: form.idea,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSubmitStatus('Request sent successfully!');
+        setForm({ name: '', email: '', idea: '', funderId: '' });
+      } else {
+        setSubmitStatus(data.message || 'Failed to submit request');
+      }
+    } catch (err) {
+      setSubmitStatus('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="connect-page">
       <form className="connect-form" onSubmit={handleSubmit}>
@@ -33,14 +84,29 @@ function Connect() {
         <input name="name" value={form.name} onChange={handleChange} placeholder="Your Name" required />
         <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required />
         <textarea name="idea" value={form.idea} onChange={handleChange} placeholder="Describe your business idea" required />
-        <button type="submit">Connect Me</button>
+        <select name="funderId" value={form.funderId} onChange={handleChange} required>
+          <option value="">Select a Funder</option>
+          {funders.map(f => (
+            <option key={f.id} value={f.id}>{f.name}</option>
+          ))}
+        </select>
+        <button type="submit" disabled={submitting || loadingFunders}>Connect Me</button>
+        {submitStatus && <div className="submit-status">{submitStatus}</div>}
       </form>
+      {loadingFunders && <div className="loading-message">Loading funders...</div>}
+      {fundersError && <div className="error-message">{fundersError}</div>}
       <div className="funder-cards">
         {funders.map((f, i) => (
-          <div className="funder-card" key={i}>
+          <div className="funder-card" key={f.id}>
             <h3>{f.name}</h3>
             <span className="funder-type">{f.type}</span>
-            <p>{f.desc}</p>
+            <p>{f.description}</p>
+            <div className="funder-details">
+              <div><strong>Focus:</strong> {Array.isArray(f.focus) ? f.focus.join(', ') : f.focus}</div>
+              <div><strong>Investment Range:</strong> {f.investmentRange}</div>
+              <div><strong>Stage:</strong> {Array.isArray(f.stage) ? f.stage.join(', ') : f.stage}</div>
+              <div><a href={f.website} target="_blank" rel="noopener noreferrer">Website</a></div>
+            </div>
           </div>
         ))}
       </div>
@@ -132,18 +198,80 @@ function Learn() {
 function PitchHelp() {
   const [file, setFile] = React.useState(null);
   const [feedback, setFeedback] = React.useState('');
-  const handleFile = e => {
-    const f = e.target.files[0];
-    setFile(f);
-    // Simulate AI feedback
-    setTimeout(() => setFeedback('Great start! Consider clarifying your value proposition and target audience.'), 1200);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const handleFile = async (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+    setFeedback('');
+    setError('');
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('pitchFile', selectedFile);
+
+      const response = await fetch('http://localhost:5000/api/ai/pitch-feedback-file', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setFeedback(data.feedback);
+      } else {
+        setError(data.message || 'Failed to get feedback');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+      console.error('Upload error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <div className="pitch-help-page">
       <h2>Pitch Help: Get AI Feedback</h2>
-      <input type="file" accept=".pdf,.doc,.docx,.txt" onChange={handleFile} />
-      {file && <div className="file-info">Uploaded: {file.name}</div>}
-      {feedback && <div className="ai-feedback"><strong>AI Feedback:</strong> {feedback}</div>}
+      <p>Upload your pitch document (PDF, DOC, DOCX, or TXT) to get personalized AI feedback.</p>
+      
+      <input 
+        type="file" 
+        accept=".pdf,.doc,.docx,.txt" 
+        onChange={handleFile}
+        disabled={loading}
+      />
+      
+      {file && (
+        <div className="file-info">
+          Uploaded: {file.name} ({Math.round(file.size / 1024)}KB)
+        </div>
+      )}
+      
+      {loading && (
+        <div className="loading-message">
+          Analyzing your pitch document... Please wait.
+        </div>
+      )}
+      
+      {error && (
+        <div className="error-message">
+          <strong>Error:</strong> {error}
+        </div>
+      )}
+      
+      {feedback && (
+        <div className="ai-feedback">
+          <strong>AI Feedback:</strong>
+          <div style={{ whiteSpace: 'pre-line', marginTop: '10px' }}>
+            {feedback}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -201,7 +329,254 @@ function Progress() {
   );
 }
 
+function Register() {
+  const [form, setForm] = React.useState({ name: '', email: '', password: '' });
+  const [status, setStatus] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setStatus('');
+    setLoading(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus('Registration successful! You can now log in.');
+        setForm({ name: '', email: '', password: '' });
+      } else {
+        setStatus(data.message || 'Registration failed');
+      }
+    } catch (err) {
+      setStatus('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-page">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Register</h2>
+        <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required />
+        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required />
+        <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required />
+        <button type="submit" disabled={loading}>Register</button>
+        {status && <div className="submit-status">{status}</div>}
+      </form>
+    </div>
+  );
+}
+
+function Login({ onLogin }) {
+  const [form, setForm] = React.useState({ email: '', password: '' });
+  const [status, setStatus] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setStatus('');
+    setLoading(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem('jwt', data.token);
+        setStatus('Login successful!');
+        if (onLogin) onLogin();
+      } else {
+        setStatus(data.message || 'Login failed');
+      }
+    } catch (err) {
+      setStatus('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-page">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required />
+        <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required />
+        <button type="submit" disabled={loading}>Login</button>
+        {status && <div className="submit-status">{status}</div>}
+      </form>
+    </div>
+  );
+}
+
+function Profile({ onLogout }) {
+  const [profile, setProfile] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState('');
+
+  React.useEffect(() => {
+    async function fetchProfile() {
+      setLoading(true);
+      setError('');
+      try {
+        const token = localStorage.getItem('jwt');
+        const res = await fetch('http://localhost:5000/api/users/profile', {
+          headers: { 'Authorization': 'Bearer ' + token },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setProfile(data.user);
+        } else {
+          setError(data.message || 'Failed to load profile');
+        }
+      } catch (err) {
+        setError('Network error. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwt');
+    if (onLogout) onLogout();
+  };
+
+  if (loading) return <div className="loading-message">Loading profile...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (!profile) return null;
+
+  return (
+    <div className="profile-page">
+      <h2>Your Profile</h2>
+      <div><strong>Name:</strong> {profile.name}</div>
+      <div><strong>Email:</strong> {profile.email}</div>
+      <div><strong>Joined:</strong> {new Date(profile.createdAt).toLocaleString()}</div>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  );
+}
+
+function BusinessAdvice() {
+  const [form, setForm] = React.useState({ question: '', context: '', industry: '' });
+  const [advice, setAdvice] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setAdvice('');
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/ai/business-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAdvice(data.advice);
+      } else {
+        setError(data.message || 'Failed to get advice');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="business-advice-page">
+      <form className="business-advice-form" onSubmit={handleSubmit}>
+        <h2>Business Advice: Ask AI</h2>
+        <textarea name="question" value={form.question} onChange={handleChange} placeholder="Your business question..." required rows={3} />
+        <input name="context" value={form.context} onChange={handleChange} placeholder="Context (optional)" />
+        <input name="industry" value={form.industry} onChange={handleChange} placeholder="Industry (optional)" />
+        <button type="submit" disabled={loading}>Get Advice</button>
+      </form>
+      {loading && <div className="loading-message">Getting advice...</div>}
+      {error && <div className="error-message">{error}</div>}
+      {advice && (
+        <div className="ai-feedback">
+          <strong>AI Advice:</strong>
+          <div style={{ whiteSpace: 'pre-line', marginTop: '10px' }}>{advice}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AnalyticsDashboard() {
+  const [analytics, setAnalytics] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState('');
+
+  React.useEffect(() => {
+    async function fetchAnalytics() {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await fetch('http://localhost:5000/api/analytics/dashboard');
+        const data = await res.json();
+        if (res.ok) {
+          setAnalytics(data.analytics);
+        } else {
+          setError(data.message || 'Failed to load analytics');
+        }
+      } catch (err) {
+        setError('Network error. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAnalytics();
+  }, []);
+
+  if (loading) return <div className="loading-message">Loading analytics...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (!analytics) return null;
+
+  return (
+    <div className="analytics-dashboard-page">
+      <h2>Platform Analytics</h2>
+      <ul className="analytics-list">
+        <li><strong>Total Users:</strong> {analytics.totalUsers}</li>
+        <li><strong>Total Connections:</strong> {analytics.totalConnections}</li>
+        <li><strong>Total Pitch Reviews:</strong> {analytics.totalPitchReviews}</li>
+        <li><strong>Active Funders:</strong> {analytics.activeFunders}</li>
+        <li><strong>Success Stories:</strong> {analytics.successStories}</li>
+      </ul>
+      <h3>Monthly Stats</h3>
+      <ul className="analytics-list">
+        <li><strong>New Users:</strong> {analytics.monthlyStats.newUsers}</li>
+        <li><strong>New Connections:</strong> {analytics.monthlyStats.newConnections}</li>
+        <li><strong>Pitch Reviews:</strong> {analytics.monthlyStats.pitchReviews}</li>
+      </ul>
+    </div>
+  );
+}
+
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = React.useState(!!localStorage.getItem('jwt'));
+
+  const handleLogin = () => setIsLoggedIn(true);
+  const handleLogout = () => setIsLoggedIn(false);
+
   return (
     <Router>
       <nav className="navbar">
@@ -212,6 +587,11 @@ function App() {
           <li><Link to="/learn">Learn</Link></li>
           <li><Link to="/pitch-help">Pitch Help</Link></li>
           <li><Link to="/progress">Progress</Link></li>
+          <li><Link to="/business-advice">Business Advice</Link></li>
+          <li><Link to="/analytics">Analytics</Link></li>
+          {!isLoggedIn && <li><Link to="/register">Register</Link></li>}
+          {!isLoggedIn && <li><Link to="/login">Login</Link></li>}
+          {isLoggedIn && <li><Link to="/profile">Profile</Link></li>}
         </ul>
       </nav>
       <div className="page-content">
@@ -222,6 +602,11 @@ function App() {
           <Route path="/learn" element={<Learn />} />
           <Route path="/pitch-help" element={<PitchHelp />} />
           <Route path="/progress" element={<Progress />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/profile" element={<Profile onLogout={handleLogout} />} />
+          <Route path="/business-advice" element={<BusinessAdvice />} />
+          <Route path="/analytics" element={<AnalyticsDashboard />} />
         </Routes>
       </div>
     </Router>
